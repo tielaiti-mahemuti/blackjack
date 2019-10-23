@@ -1,0 +1,103 @@
+import random
+
+def deck_cards():
+	'''
+	Initialize a deck of cards.
+	Number of cards should be 52, they should range from 1 - 13. 
+	'''
+	cards_list = [1,2,3,4,5,6,7,8,9,10,11,12,13] #Initial set of cards numbered 1 through 13
+	deck = [] #Empty list to store the full deck of cards
+	for i in range (0,4):
+		deck.extend(cards_list) #For each iteration, extend the list by the range of cards 1 through 13 to get a list of 52 cards.
+
+	return(deck)
+
+def player_turn(player, cards):
+	'''
+	Simple function to draw a card from deck, return the randomly drawn card
+	'''
+	random_card = random.choice(cards) #random.choice from deck to get 1 random value
+	print(f"{player} your card is: {random_card}")
+
+	return(random_card)
+
+def dealer_turn(cards):
+	'''
+	Simple function to draw a card from deck, not printing this as this is the dealers hand
+	'''
+	random_card = random.choice(cards)
+
+	return(random_card)
+
+def check_game(player, dealer_hand, deck):
+	print(f"The dealer hand is as follows: {dealer_hand}")
+	dealer_total = dealer_hand[0] + dealer_hand[1]
+	while True:
+		if dealer_total > 17:
+			if(dealer_total > 21):
+				dealer_total -= dealer_card
+				dealer_hand.remove(dealer_card)
+				continue
+			else:
+				break
+		else:
+			dealer_card = dealer_turn(deck)
+			dealer_hand.append(dealer_card)
+			deck.remove(dealer_card)
+			print(f"The dealer's new hand is as follows: {dealer_hand}")
+			for i in range(2,len(dealer_hand)):
+				dealer_total += dealer_hand[i]
+
+	difference_player = 21 - player
+	difference_dealer = 21 - dealer_total
+
+	if(player == 21):
+		print("Congratulations! Your got a BlackJack!!!\nYou beat the dealer")
+	else:
+		if(difference_dealer > difference_player):
+			print(f"Congratulations!\nYour hand was {player} and the Dealer had {dealer_total}.\nAs a result you beat the Dealer!")
+		elif(difference_dealer < difference_player):
+			print(f"I'm sorry.. Your hand was {player} and the Dealer had {dealer_total}.\nAs a result you lost to the Dealer!")
+		else:
+			print(f"Woah... You had {player} and the Dealer had {dealer_total}, it was a tie but...\nAs the rules go, tie goes to the Dealer.")
+
+name = input("Welcome to BlackJack game.\nBefore we start, let us know who is playing: ")
+player_hand = []
+dealer_hand = []
+
+deck = deck_cards()
+
+for i in range(0,2):
+	player_card = player_turn(name, deck)
+	player_hand.append(player_card)
+	deck.remove(player_card)
+
+	dealer_card = dealer_turn(deck)
+	dealer_hand.append(dealer_card)
+	deck.remove(dealer_card)
+	if(i == 0):
+		print(f"The dealer's first card is: {dealer_card}")
+
+print(f"{name} your hand is currently: {player_hand}")
+print(f"The dealer's first card was: {dealer_hand[0]}")
+
+sum_player = 0
+while True:
+	hit = input(f"{name} do you wish to hit? Enter 'yes' or 'no': ")
+	if(hit.lower() == 'yes'):
+		player_card = player_turn(name, deck)
+		player_hand.append(player_card)
+		deck.remove(player_card)
+		print(f"{name} your hand is now: {player_hand}")
+		for i in range(len(player_hand)):
+			sum_player += player_hand[i]
+		if(sum_player > 21):
+			print("Sorry, you busted.... You LOSE :(")
+			break
+	elif(hit.lower() == 'no'):
+		for i in range(len(player_hand)):
+			sum_player += player_hand[i]
+		game_result = check_game(sum_player, dealer_hand, deck)
+		break
+	else:
+		continue
