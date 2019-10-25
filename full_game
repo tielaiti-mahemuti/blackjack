@@ -1,0 +1,305 @@
+import random
+
+def initial_pot():
+	'''
+	Function to determine how much the player wants to start the game of BJ with
+	'''
+	while True:
+		pot = input("Please enter how much money you would like to play with\nYou can start with $50, $100 or $500 pot: ")
+		if(pot.isdigit()):
+			initial_pot = int(pot)
+			if(initial_pot == 50 or initial_pot == 100 or initial_pot == 500):
+				break
+			else:
+				print("We only accept initial pot of either $50, $100 or $500")
+				continue
+		else:
+			continue
+
+	return(initial_pot)
+
+def bet(pot):
+	'''
+	Function to take in a bet amount from player
+	'''
+	while True:
+		bet_amount = input("How much money would you like to bet on this hand?\n")
+		if(bet_amount.isdigit()):
+			bet_amount = int(bet_amount)
+			if(bet_amount in range(1,pot+1)):
+				print(f"Okay, you have decided to place ${bet_amount} on this hand.\nBest of Luck!")
+				break
+			else:
+				print(f"Sorry, you can't place a bet more than the money in your pot.\nYou currrently have ${pot} in your pot")
+				continue
+		else:
+			print("Please enter a valid amount to place bet...")
+			continue
+
+	return(bet_amount)
+
+def deck_cards():
+	'''
+	Initialize a deck of cards.
+	Number of cards should be 52, they should range from 1 - 13.
+	'''
+	cards_list = [1,2,3,4,5,6,7,8,9,10,11,12,13] #Initial set of cards numbered 1 through 13
+	deck = [] #Empty list to store the full deck of cards
+	for i in range (0,4):
+		deck.extend(cards_list) #For each iteration, extend the list by the range of cards 1 through 13 to get a list of 52 cards.
+
+	return(deck)
+
+def initial_hand(player, cards):
+	'''
+	Function to give the player 2 cards
+	Also gives dealer 2 cards
+	Initializing the hand to begin the game
+	'''
+	player_hand = []
+	dealer_hand = []
+
+	for i in range(0,2):
+		random_card = random.choice(cards) #random.choice from deck to get 1 random value
+		cards.remove(random_card)
+		if(random_card == 1):
+			player_hand.append(['ACE',1,11])
+		else:
+			player_hand.append(random_card)
+		print(f"{player} your card is: {random_card}")
+		random_card = random.choice(cards) #random.choice from remainder of deck to select card for dealer
+		cards.remove(random_card)
+		if(random_card == 1):
+			dealer_hand.append('ACE')
+		else:
+			dealer_hand.append(random_card)
+		if(i == 0):
+			print(f"The dealer's first card is: {random_card}")
+
+	return(player_hand, dealer_hand)
+
+def player_turn(hand, cards):
+	'''
+	Function that keeps running for the duration that player replies yes to 'Do you want to hit?'
+	'''
+	while True:
+		sum_player = 0
+		for i in range(0,len(hand)):
+			if(hand[i] == ['ACE',1,11]):
+				place_holder = int(input("Since you have an ACE, do you wish to use it as 1 or 11: "))
+				if(place_holder == 1):
+					sum_player += place_holder
+				elif(place_holder == 11):
+					sum_player += place_holder
+			elif(hand[i] > 10):
+				place_holder = 10
+				sum_player += place_holder
+			else:
+				sum_player += hand[i]
+		print(f"Your current hand total is: {sum_player}")
+		reply = input(f"Your hand is: {hand}.\nDo you wish to hit? ")
+		if(reply.lower() == 'no' or reply.lower() == 'n'):
+			break
+		elif(reply.lower() == 'yes' or reply.lower() == 'y'):
+			new_hand = 0
+			random_card = random.choice(cards)
+			cards.remove(random_card)
+			if(random_card == 1):
+				hand.append(['ACE',1,11])
+			else:
+				hand.append(random_card)
+			print(f"You drew: {random_card}.")
+			for i in range(0,len(hand)):
+				if(hand[i] == ['ACE',1,11]):
+					place_holder = int(input("Since you have an ACE, do you wish to use it as 1 or 11: "))
+					if(place_holder == 1):
+						new_hand += place_holder
+					elif(place_holder == 11):
+						new_hand += place_holder
+				elif(hand[i] > 10):
+					placer_holder = 10
+					new_hand += placer_holder
+				else:
+					new_hand += hand[i]
+			#print(f"Your current hand total is: {sum_player}")
+			if(new_hand > 21):
+				print("You busted... You lose")
+				hand.append('BUST')
+				break
+			else:
+				continue
+		else:
+			print("Please enter a valid answer 'yes' or 'no'...")
+			continue
+
+	return(hand, sum_player)
+
+def dealer_turn(hand, cards):
+	'''
+	Function to make dealer draw if he has less than 16.
+	'''
+	while(True):
+		sum_dealer = 0
+		if('ACE' in hand):
+			place_holder = 11
+		for i in range(0,len(hand)):
+			if(hand[i] == 'ACE'):
+				sum_dealer += place_holder
+			elif(hand[i] > 10):
+				placer_holder = 10
+				sum_dealer += placer_holder
+			else:
+				sum_dealer += hand[i]
+
+		if(sum_dealer > 21):
+			print("Lucky you, the dealer busted.")
+			hand.append('BUST')
+			break
+		elif(sum_dealer <= 16):
+			print(f"The dealer hand is: {hand}.\nBy rule he will draw one additional card.")
+			random_card = random.choice(cards)
+			cards.remove(random_card)
+			hand.append(random_card)
+			print(f"The dealer drew a: {random_card}")
+			continue
+		else:
+			break
+
+	return(hand, sum_dealer)
+
+def check_game(player, dealer, d_hand, deck):
+	'''
+	Function to see who won, player or dealer.
+	'''
+	difference_player = 21 - player
+	difference_dealer = 21 - dealer
+
+	if(player == dealer):
+		result = 'draw'
+	elif(difference_dealer < difference_player):
+		result = 'dealer'
+	else:
+		result = 'player'
+
+	return(result)
+
+name = input("Welcome to BlackJack game.\nBefore we start, let us know who is playing: ")
+
+account = initial_pot()
+
+game_round = 1
+
+while True:
+	deck = deck_cards() #Initialize deck at the start of each new round.
+
+	player_bet = bet(account) #Ask player how much they want to bet
+
+	player, dealer = initial_hand(name, deck) #Deal first hand to both player and dealer
+
+	player, sum_player = player_turn(player, deck)
+
+	if('BUST' in player):
+		account -= player_bet
+		if(account == 0):
+			print("You are out of money in your pot...\nThanks for playing, we hope you come again!")
+			break
+		else:
+			replay = input(f"You have ${account} left in your pot, would you like to play another round?\n")
+			while True:
+				if(replay.lower() == 'yes' or replay.lower() == 'y'):
+					game_round += 1
+					print(f"Great! Let's start round {game_round}")
+					break
+				elif(replay.lower() == 'no' or replay.lower() == 'n'):
+					print("Thanks for playing!")
+					break
+				else:
+					replay = input("Please respond with either a 'yes' or a 'no'")
+					continue
+			if(replay.lower() == 'yes' or replay.lower() == 'y'):
+				continue
+			else:
+				break
+
+	else:
+		dealer, sum_dealer = dealer_turn(dealer, deck)
+		if('BUST' in dealer):
+			account += player_bet
+			replay = input(f"You now have ${account} in your pot, would you like to play another round?\n")
+			while True:
+				if(replay.lower() == 'yes' or replay.lower() == 'y'):
+					game_round += 1
+					print(f"Great! Let's start round {game_round}")
+					break
+				elif(replay.lower() == 'no' or replay.lower() == 'n'):
+					print("Thanks for playing!")
+					break
+				else:
+					replay = input("Please respond with either a 'yes' or a 'no'")
+					continue
+			if(replay.lower() == 'yes' or replay.lower() == 'y'):
+				continue
+			else:
+				break
+		else:
+			game_result = check_game(sum_player, sum_dealer, dealer, deck)
+			if(game_result == 'draw'):
+				print(f"Woah... You had {player} and the Dealer had {sum_dealer} with a hand of {dealer}, it was a tie")
+				replay = input(f"You have ${account} left in your pot, would you like to play another round?\n")
+				while True:
+					if(replay.lower() == 'yes' or replay.lower() == 'y'):
+						game_round += 1
+						print(f"Great! Let's start round {game_round}")
+						break
+					elif(replay.lower() == 'no' or replay.lower() == 'n'):
+						print("Thanks for playing!")
+						break
+					else:
+						replay = input("Please respond with either a 'yes' or a 'no'")
+						continue
+				if(replay.lower() == 'yes' or replay.lower() == 'y'):
+					continue
+				else:
+					break
+			elif(game_result == 'player'):
+				account += player_bet
+				print(f"Congratulations!\nYour hand was {player} and the Dealer had {sum_dealer} with a hand of {dealer}.\nAs a result you beat the Dealer!")
+				replay = input(f"You have ${account} left in your pot, would you like to play another round?\n")
+				while True:
+					if(replay.lower() == 'yes' or replay.lower() == 'y'):
+						game_round += 1
+						print(f"Great! Let's start round {game_round}")
+						break
+					elif(replay.lower() == 'no' or replay.lower() == 'n'):
+						print("Thanks for playing!")
+						break
+					else:
+						replay = input("Please respond with either a 'yes' or a 'no'")
+						continue
+				if(replay.lower() == 'yes' or replay.lower() == 'y'):
+					continue
+				else:
+					break
+			else:
+				account -= player_bet
+				print(f"I'm sorry.. Your hand was {player} and the Dealer had {sum_dealer} with a hand of {dealer}.\nAs a result you lost to the Dealer!")
+				if(account == 0):
+					print("You are out of money in your pot...\nThanks for playing, we hope you come again!")
+					break
+				else:
+					replay = input(f"You have ${account} left in your pot, would you like to play another round?\n")
+					while True:
+						if(replay.lower() == 'yes' or replay.lower() == 'y'):
+							game_round += 1
+							print(f"Great! Let's start round {game_round}")
+							break
+						elif(replay.lower() == 'no' or replay.lower() == 'n'):
+							print("Thanks for playing!")
+							break
+						else:
+							replay = input("Please respond with either a 'yes' or a 'no'")
+							continue
+					if(replay.lower() == 'yes' or replay.lower() == 'y'):
+						continue
+					else:
+						break
